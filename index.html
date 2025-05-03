@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Elatyeb Ali Abdalla Mohamed">
+    <title>First Aid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .slide {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        #slideInput {
+            width: 60px;
+            text-align: center;
+            margin: 5px;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .translation-area {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+        }
+        .arabic {
+            direction: rtl;
+            font-family: 'Amiri', serif;
+            font-size: 2.2em;
+            color: blue;
+        }
+        .english {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.2em;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Q SKILLS INTRO LS<br> Page 109</h3>
+<div class="slide"></div>
+
+<audio id="audioPlayer" controls></audio>
+
+<div class="controls">
+    <button onclick="previousSlide()">
+        <img src="backward.png" alt="Previous" style="width: 20px; height: 20px;">
+    </button>
+    <button onclick="nextSlide()">
+        <img src="forward.png" alt="Next" style="width: 20px; height: 20px;">
+    </button>
+    <input type="number" id="slideInput" min="1" max="4" placeholder="Slide" />
+    <button onclick="goToSlide()">&#128269;</button>
+    <button onclick="checkAnswer()">Check</button>
+    <span class="feedback" id="feedback"></span>
+</div>
+
+<!-- Text area for user translation -->
+<textarea id="userTranslation" class="translation-area" placeholder="Look at the Arabic. Translate into English and check."></textarea>
+
+<script>
+    let utterance = new SpeechSynthesisUtterance();
+    const Items = [
+    {
+            audio: "I am Saud.mp3",
+            English: "I am Saud .",
+            translation: "أنا سعود",
+        },
+        {
+            audio: "I am a teacher.mp3",
+            English: "I am a teacher .",
+            translation: "أنا معلم",
+        },
+        {
+            audio: "I really like my job.mp3",
+            English: "I really like my job .",
+            translation: "تعجبني و ظيفتي حقًا",
+        },
+        {
+            audio: "but I’m very busy.mp3",
+            English: "but I’m very busy .",
+            translation: "لكنني مشغول جدًا",
+        },
+        {
+            audio: "On the weekends, I relax and read books.mp3",
+            English: "On the weekends, I relax and read books .",
+            translation: "في عطلة نهاية الأسبوع، أسترخي وأقرأ الكتب",
+        },
+        {
+            audio: "I’m also interested in sports.mp3",
+            English: "I’m also interested in sports .",
+            translation: "أنا مهتم أيضًا بالرياضة",
+        },
+        {
+            audio: "My favorite sport is swimming.mp3",
+            English: "My favorite sport is swimming .",
+            translation: "رياضتي المفضلة هي السباحة",
+        },
+        {
+            audio: "I go to the beach every Saturday.mp3",
+            English: "I go to the beach every Saturday .",
+            translation: "أذهب إلى الشاطئ كل يوم سبت",
+        },
+    ];
+
+    let currentAudioIndex = 0;
+
+    const propertyHandlers = {
+        English: (value) => `<details><summary>English Script:</summary><p class="english">${value}</p></details>`,
+        translation: (value) => `<details><summary>Translation:</summary><p class="arabic">${value}</p></details>`,
+    };
+
+    const audioPlayer = document.getElementById("audioPlayer");
+    audioPlayer.src = Items[currentAudioIndex].audio;
+
+    function displayData() {
+        const slideContainer = document.querySelector(".slide");
+        slideContainer.innerHTML = `<p>Sound Clip: ${currentAudioIndex + 1} of ${Items.length}</p>`;
+        audioPlayer.src = Items[currentAudioIndex].audio;
+
+        for (const key in Items[currentAudioIndex]) {
+            const value = Items[currentAudioIndex][key];
+            if (propertyHandlers[key] && value !== undefined) {
+                slideContainer.innerHTML += propertyHandlers[key](value);
+            }
+        }
+    }
+
+    function clearFeedback() {
+        document.getElementById("feedback").innerHTML = '';
+        document.getElementById("userTranslation").value = ''; // Clear the text area
+    }
+
+    function nextSlide() {
+        currentAudioIndex = (currentAudioIndex + 1) % Items.length;
+        clearFeedback();
+        displayData();
+        audioPlayer.play();
+    }
+
+    function previousSlide() {
+        currentAudioIndex = (currentAudioIndex - 1 + Items.length) % Items.length;
+        clearFeedback();
+        displayData();
+        audioPlayer.play();
+    }
+
+    function goToSlide() {
+        const input = document.getElementById("slideInput").value;
+        const index = parseInt(input) - 1;
+        if (index >= 0 && index < Items.length) {
+            currentAudioIndex = index;
+            clearFeedback();
+            displayData();
+        } else {
+            alert("Please enter a valid slide number.");
+        }
+    }
+
+    function checkAnswer() {
+        const userTranslation = document.getElementById("userTranslation").value.trim();
+        const correctAnswer = Items[currentAudioIndex].English; // Check against the English text
+        const feedback = document.getElementById("feedback");
+        feedback.innerHTML = '';
+
+        if (userTranslation === correctAnswer) {
+            feedback.innerHTML = "&#10004;"; // Show tick mark for correct answer
+            feedback.style.color = "green"; // Indicate success
+            speakCorrectAnswer(correctAnswer); // Convert correct answer to speech
+        } else {
+            let result = '';
+            const userWords = userTranslation.split(' ');
+            const correctWords = correctAnswer.split(' ');
+
+            for (let i = 0; i < correctWords.length; i++) {
+                if (userWords[i] === correctWords[i]) {
+                    result += correctWords[i] + ' '; // Keep correct words
+                } else {
+                    // Replace incorrect letters with asterisks
+                    let modifiedWord = '';
+                    const minLength = Math.min(userWords[i].length, correctWords[i].length);
+                    for (let j = 0; j < correctWords[i].length; j++) {
+                        if (j < minLength && userWords[i][j] === correctWords[i][j]) {
+                            modifiedWord += correctWords[i][j]; // Keep correct letters
+                        } else {
+                            modifiedWord += '*'; // Replace incorrect letters with asterisks
+                        }
+                    }
+                    result += modifiedWord + ' '; // Add modified word to result
+                }
+            }
+            feedback.innerHTML = result.trim(); // Show modified translation
+            feedback.style.color = "red"; // Indicate that the user needs to correct their answer
+        }
+    }
+
+    function speakCorrectAnswer(answer) {
+        utterance.text = answer; // Set the text to be spoken
+        window.speechSynthesis.speak(utterance); // Speak the text
+    }
+
+    displayData();
+</script>
+<footer>
+    <p>&#169; 2025 Eltayeb Mohamed.<br> All rights reserved.</p>
+</footer>
+</body>
+</html>
